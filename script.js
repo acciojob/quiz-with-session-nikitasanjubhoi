@@ -1,5 +1,3 @@
-// your JS code here.
-
 const questionsElement = document.getElementById("questions");
 const submitButton = document.getElementById("submit");
 const scoreElement = document.getElementById("score");
@@ -32,7 +30,7 @@ const questions = [
   },
 ];
 
-// ✅ Load previous answers from session storage
+// ✅ Load previous answers from sessionStorage (or initialize)
 let userAnswers = [];
 const savedProgress = sessionStorage.getItem("progress");
 if (savedProgress) {
@@ -41,9 +39,10 @@ if (savedProgress) {
   userAnswers = new Array(questions.length).fill(null);
 }
 
-// ✅ Render questions and restore checked answers
+// ✅ Display questions and restore selections
 function renderQuestions() {
-  questionsElement.innerHTML = ""; // Clear on rerender
+  questionsElement.innerHTML = ""; // Clear previous
+
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
     const questionWrapper = document.createElement("div");
@@ -65,12 +64,13 @@ function renderQuestions() {
       choiceElement.setAttribute("value", choice);
       choiceElement.setAttribute("id", choiceId);
 
-      // ✅ Restore checked radio
+      // ✅ Restore selection
       if (userAnswers[i] === choice) {
         choiceElement.checked = true;
+        choiceElement.setAttribute("checked", "true"); // ✅ For Cypress
       }
 
-      // ✅ Update session storage on change
+      // ✅ Update sessionStorage on change
       choiceElement.addEventListener("change", function () {
         userAnswers[i] = choice;
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
@@ -86,25 +86,28 @@ function renderQuestions() {
   }
 }
 
-// ✅ Handle quiz submission
+// ✅ Submit logic
 submitButton.addEventListener("click", function () {
   let score = 0;
+
   for (let i = 0; i < questions.length; i++) {
     if (userAnswers[i] === questions[i].answer) {
       score++;
     }
   }
 
-  // ✅ Display and store score
-  scoreElement.textContent = `Your score is ${score} out of ${questions.length}.`;
-  localStorage.setItem("score", score);
+  const resultText = `Your score is ${score} out of ${questions.length}.`;
+  scoreElement.textContent = resultText;
+
+  // ✅ Store in localStorage
+  localStorage.setItem("score", score.toString());
 });
 
-// ✅ On load, show previous score if available
+// ✅ Load score from localStorage (if any)
 const savedScore = localStorage.getItem("score");
 if (savedScore !== null) {
   scoreElement.textContent = `Your score is ${savedScore} out of ${questions.length}.`;
 }
 
-// ✅ Render everything
+// ✅ Initial render
 renderQuestions();
